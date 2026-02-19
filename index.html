@@ -128,6 +128,49 @@
       color: #3b2f2f;
     }
 
+    .celebration {
+      position: absolute;
+      inset: 0;
+      background: #fff8;
+      backdrop-filter: blur(2px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 24px;
+      z-index: 5;
+    }
+
+    .celebration.show {
+      display: flex;
+    }
+
+    .celebration-box {
+      background: #fffefc;
+      border: 2px solid #00000022;
+      border-radius: 16px;
+      padding: 18px;
+      box-shadow: 0 10px 20px #00000022;
+      max-width: 520px;
+    }
+
+    .confetti {
+      position: absolute;
+      top: -18px;
+      width: 8px;
+      height: 14px;
+      opacity: 0.9;
+      animation: fall linear forwards;
+      z-index: 4;
+    }
+
+    @keyframes fall {
+      to {
+        transform: translateY(520px) rotate(660deg);
+        opacity: 0.95;
+      }
+    }
+
     @media (max-width: 600px) {
       .card {
         padding: 20px;
@@ -153,6 +196,16 @@
 
     <div class="result" id="result">Choose an option, mister.</div>
     <button class="next" id="nextQuestion">Next question</button>
+
+    <section class="celebration" id="celebration">
+      <div class="celebration-box">
+        <h2>Congratulations!</h2>
+        <p>
+          You completed all 3 questions and somehow discovered
+          the only correct answers. What a shocking coincidence.
+        </p>
+      </div>
+    </section>
   </main>
 
   <script>
@@ -171,16 +224,12 @@
         text: "Who is always right?",
         his: "Let's discuss...",
         yours: "My wife, forever"
-      },
-      {
-        text: "Who should pick movie night?",
-        his: "I should",
-        yours: "My wife should"
       }
     ];
 
     let index = 0;
     let escapeCount = 0;
+    let answeredCurrent = false;
 
     const questionEl = document.getElementById("question");
     const resultEl = document.getElementById("result");
@@ -188,6 +237,7 @@
     const hisBtn = document.getElementById("hisAnswer");
     const myBtn = document.getElementById("myAnswer");
     const nextBtn = document.getElementById("nextQuestion");
+    const celebration = document.getElementById("celebration");
 
     function renderQuestion() {
       const q = questions[index];
@@ -197,6 +247,11 @@
       resultEl.textContent = "Choose an option, mister.";
       resetHisButton();
       escapeCount = 0;
+      answeredCurrent = false;
+      celebration.classList.remove("show");
+      hisBtn.disabled = false;
+      myBtn.disabled = false;
+      nextBtn.textContent = index === questions.length - 1 ? "Finish" : "Next question";
     }
 
     function resetHisButton() {
@@ -235,9 +290,39 @@
 
     myBtn.addEventListener("click", () => {
       resultEl.textContent = "Correct choice. Marriage status: excellent.";
+      answeredCurrent = true;
     });
 
+    function fireConfetti() {
+      const colors = ["#e76f51", "#2a9d8f", "#e9c46a", "#f4a261", "#264653"];
+      for (let i = 0; i < 120; i += 1) {
+        const bit = document.createElement("span");
+        bit.className = "confetti";
+        bit.style.left = `${Math.random() * 100}%`;
+        bit.style.background = colors[Math.floor(Math.random() * colors.length)];
+        bit.style.animationDuration = `${1.8 + Math.random() * 1.9}s`;
+        bit.style.animationDelay = `${Math.random() * 0.35}s`;
+        bit.style.transform = `translateY(0) rotate(${Math.random() * 360}deg)`;
+        celebration.appendChild(bit);
+        setTimeout(() => bit.remove(), 4200);
+      }
+    }
+
     nextBtn.addEventListener("click", () => {
+      if (!answeredCurrent) {
+        resultEl.textContent = "Nice try. Pick the right answer first.";
+        return;
+      }
+
+      if (index === questions.length - 1) {
+        celebration.classList.add("show");
+        resultEl.textContent = "Final score: Husband trained successfully.";
+        hisBtn.disabled = true;
+        myBtn.disabled = true;
+        fireConfetti();
+        return;
+      }
+
       index = (index + 1) % questions.length;
       renderQuestion();
     });
