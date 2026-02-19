@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Husband Quiz Trap</title>
+  <style>
+    :root {
+      --bg-1: #fff4e6;
+      --bg-2: #ffd6a5;
+      --card: #fffaf3;
+      --text: #3b2f2f;
+      --yes: #2a9d8f;
+      --no: #e76f51;
+      --accent: #e9c46a;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 15% 20%, #ffffff99 0 20%, transparent 21%),
+        radial-gradient(circle at 80% 25%, #ffffff88 0 15%, transparent 16%),
+        linear-gradient(135deg, var(--bg-1), var(--bg-2));
+      padding: 24px;
+    }
+
+    .card {
+      width: min(720px, 100%);
+      background: var(--card);
+      border: 3px solid #00000014;
+      border-radius: 24px;
+      box-shadow: 0 14px 30px #00000022;
+      padding: 28px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: clamp(1.5rem, 3vw, 2.3rem);
+    }
+
+    p {
+      margin: 0 0 20px;
+      font-size: 1.05rem;
+    }
+
+    .question {
+      margin: 18px 0 22px;
+      font-size: clamp(1.25rem, 2.8vw, 1.85rem);
+      font-weight: 700;
+      min-height: 3lh;
+      display: grid;
+      place-items: center;
+      padding: 8px 10px;
+      background: #ffffff80;
+      border-radius: 14px;
+    }
+
+    .arena {
+      position: relative;
+      min-height: 170px;
+      border-radius: 18px;
+      border: 2px dashed #00000026;
+      background: #fffef9;
+      overflow: hidden;
+      padding: 18px;
+    }
+
+    button {
+      border: 0;
+      border-radius: 999px;
+      padding: 14px 20px;
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      touch-action: manipulation;
+      transition: transform 160ms ease, box-shadow 160ms ease;
+    }
+
+    button:active {
+      transform: scale(0.96);
+    }
+
+    #myAnswer {
+      background: var(--yes);
+      color: #fff;
+      box-shadow: 0 8px 20px #2a9d8f55;
+      position: absolute;
+      left: 50%;
+      bottom: 18px;
+      transform: translateX(-50%);
+      z-index: 1;
+    }
+
+    #hisAnswer {
+      background: var(--no);
+      color: #fff;
+      box-shadow: 0 8px 20px #e76f5155;
+      position: absolute;
+      left: 14px;
+      top: 18px;
+      z-index: 2;
+    }
+
+    .result {
+      margin-top: 18px;
+      padding: 12px;
+      border-radius: 10px;
+      background: #ffffffc0;
+      min-height: 2.5lh;
+      font-weight: 600;
+    }
+
+    .next {
+      margin-top: 14px;
+      background: var(--accent);
+      color: #3b2f2f;
+    }
+
+    @media (max-width: 600px) {
+      .card {
+        padding: 20px;
+      }
+
+      .arena {
+        min-height: 220px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <h1>Official Husband Survey</h1>
+    <p>Please answer honestly. Totally no manipulation happening.</p>
+
+    <section class="question" id="question"></section>
+
+    <section class="arena" id="arena">
+      <button id="hisAnswer" aria-label="His answer button"></button>
+      <button id="myAnswer" aria-label="Your preferred answer button"></button>
+    </section>
+
+    <div class="result" id="result">Choose an option, mister.</div>
+    <button class="next" id="nextQuestion">Next question</button>
+  </main>
+
+  <script>
+    const questions = [
+      {
+        text: "Who gives the best kisses?",
+        his: "Me, obviously",
+        yours: "My amazing wife"
+      },
+      {
+        text: "Whose cooking wins every time?",
+        his: "Mine sometimes",
+        yours: "My wife's, no contest"
+      },
+      {
+        text: "Who is always right?",
+        his: "Let's discuss...",
+        yours: "My wife, forever"
+      },
+      {
+        text: "Who should pick movie night?",
+        his: "I should",
+        yours: "My wife should"
+      }
+    ];
+
+    let index = 0;
+    let escapeCount = 0;
+
+    const questionEl = document.getElementById("question");
+    const resultEl = document.getElementById("result");
+    const arena = document.getElementById("arena");
+    const hisBtn = document.getElementById("hisAnswer");
+    const myBtn = document.getElementById("myAnswer");
+    const nextBtn = document.getElementById("nextQuestion");
+
+    function renderQuestion() {
+      const q = questions[index];
+      questionEl.textContent = q.text;
+      hisBtn.textContent = q.his;
+      myBtn.textContent = q.yours;
+      resultEl.textContent = "Choose an option, mister.";
+      resetHisButton();
+      escapeCount = 0;
+    }
+
+    function resetHisButton() {
+      hisBtn.style.left = "14px";
+      hisBtn.style.top = "18px";
+    }
+
+    function moveHisButton() {
+      const arenaRect = arena.getBoundingClientRect();
+      const btnRect = hisBtn.getBoundingClientRect();
+      const maxX = arenaRect.width - btnRect.width - 10;
+      const maxY = arenaRect.height - btnRect.height - 10;
+      const minY = 10;
+      const minX = 10;
+
+      const nextX = Math.max(minX, Math.min(maxX, Math.random() * maxX));
+      const nextY = Math.max(minY, Math.min(maxY, Math.random() * maxY));
+
+      hisBtn.style.left = `${nextX}px`;
+      hisBtn.style.top = `${nextY}px`;
+      escapeCount += 1;
+      resultEl.textContent =
+        escapeCount < 4
+          ? "Nice try."
+          : "That button is very athletic today.";
+    }
+
+    hisBtn.addEventListener("mouseenter", moveHisButton);
+    hisBtn.addEventListener("touchstart", (event) => {
+      event.preventDefault();
+      moveHisButton();
+    }, { passive: false });
+    hisBtn.addEventListener("focus", moveHisButton);
+
+    hisBtn.addEventListener("click", moveHisButton);
+
+    myBtn.addEventListener("click", () => {
+      resultEl.textContent = "Correct choice. Marriage status: excellent.";
+    });
+
+    nextBtn.addEventListener("click", () => {
+      index = (index + 1) % questions.length;
+      renderQuestion();
+    });
+
+    renderQuestion();
+  </script>
+</body>
+</html>
