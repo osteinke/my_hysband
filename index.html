@@ -359,6 +359,19 @@
 
     popupOk.addEventListener("click", () => {
       rightPopup.classList.remove("show");
+
+      if (index === questions.length - 1) {
+        celebration.classList.add("show");
+        resultEl.textContent = "Final score: Husband trained successfully.";
+        hisBtn.disabled = true;
+        myBtn.disabled = true;
+        nextBtn.disabled = true;
+        fireConfetti();
+        return;
+      }
+
+      index += 1;
+      renderQuestion();
     });
 
     function fireConfetti() {
@@ -387,6 +400,7 @@
         resultEl.textContent = "Final score: Husband trained successfully.";
         hisBtn.disabled = true;
         myBtn.disabled = true;
+        nextBtn.disabled = true;
         fireConfetti();
         return;
       }
